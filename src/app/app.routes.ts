@@ -6,6 +6,7 @@ import { StreamsComponent } from './streams/streams.component';
 import { StartComponent } from './start/start.component';
 
 export const routes: Routes = [
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   { path: 'home', component: StartComponent, title: 'Kennissessie Angular(PRs)' },
   { path: 'rxjs', component: StreamsComponent, title: 'RxJS' },
   { path: 'services', component: TasksComponent, title: 'Services' },
