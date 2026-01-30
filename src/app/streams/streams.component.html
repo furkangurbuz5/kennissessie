@@ -1,34 +1,36 @@
-<img src="rxjs-logo.png" alt="The RxJS logo" />
-<h1>RxJS en Observables</h1>
-
 <div class="streams-container">
+  <h1>RxJS Operators in Angular</h1>
+
   <!-- Introduction -->
   <div class="section">
-    <h2>What is RxJS?</h2>
+    <h2>What Are RxJS Operators?</h2>
     <p>
-      RxJS is a library for <strong>reactive programming</strong> using
-      <strong>Observables</strong>. It helps manage
-      <strong>asynchronous data streams</strong> (e.g., user inputs, HTTP
-      responses, timers).
+      Operators are <strong>pure functions</strong> that transform, filter, or
+      combine observables. They allow you to manipulate data streams in a
+      declarative way.
     </p>
+    Common operators:
     <ul>
+      <li><code>map</code>: Transform each emitted value.</li>
+      <li><code>filter</code>: Only emit values that meet a condition.</li>
       <li>
-        <strong>Observables</strong>: Represent streams of data over time.
+        <code>debounceTime</code>: Delay emissions until a period of inactivity.
       </li>
+      <li><code>take</code>: Only emit the first N values.</li>
       <li>
-        <strong>Operators</strong>: Transform, filter, or combine streams (e.g.,
-        `map`, `filter`, `debounceTime`).
-      </li>
-      <li>
-        <strong>Subscriptions</strong>: Execute side effects when data arrives.
+        <code>tap</code>: Perform side effects without modifying the stream.
       </li>
     </ul>
   </div>
 
   <!-- Interval Example -->
   <div class="section">
-    <h2>Example 1: Interval Stream</h2>
-    <p>Demonstrates a stream that emits values every second.</p>
+    <h2>Example 1: Interval Stream with Operators</h2>
+    <p>
+      This example uses <code>interval</code> to emit values every second and
+      applies <code>map</code>, <code>filter</code>, and
+      <code>take</code> operators.
+    </p>
 
     <div class="controls">
       <button (click)="startIntervalStream()" [disabled]="isIntervalRunning">
@@ -37,114 +39,149 @@
       <button (click)="stopIntervalStream()" [disabled]="!isIntervalRunning">
         Stop Stream
       </button>
-      <button (click)="dangerousLeakingInterval()" class="danger-button">
-        ⚠️ Leaking Stream (Demo)
+    </div>
+
+    <div class="output">
+      <h3>Operator Pipeline:</h3>
+      <ol>
+        <li><code>interval(1000)</code>: Emits 0, 1, 2, 3... every second.</li>
+        <li>
+          <code>tap</code>: Logs raw values →
+          <strong>{{ intervalValues }}</strong>
+        </li>
+        <li>
+          <code>map(value => value * 2)</code>: Doubles each value →
+          <strong>{{ mappedValues }}</strong>
+        </li>
+        <li>
+          <code>filter(value => value % 3 === 0)</code>: Keeps multiples of 3 →
+          <strong>{{ filteredValues }}</strong>
+        </li>
+        <li>
+          <code>take(10)</code>: Takes first 10 values →
+          <strong>{{ takenValues }}</strong>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- Search Example -->
+  <div class="section">
+    <h2>Example 2: Search with Debounce</h2>
+    <p>
+      This example uses <code>debounceTime</code> and <code>map</code> to filter
+      a list of users based on a search term. The search only triggers after
+      500ms of inactivity.
+    </p>
+
+    <div class="search-container">
+      <input
+        type="text"
+        [formControl]="searchControl"
+        placeholder="Search users..."
+        class="search-input"
+      />
+      <div *ngIf="searchResults.length > 0" class="search-results">
+        <h3>Results:</h3>
+        <ul>
+          <li *ngFor="let result of searchResults">{{ result }}</li>
+        </ul>
+      </div>
+      <div
+        *ngIf="searchResults.length === 0 && searchControl.value"
+        class="no-results"
+      >
+        No users found.
+      </div>
+    </div>
+  </div>
+
+  <!-- Mouse Move Example -->
+  <div class="section">
+    <h2>Example 3: Mouse Move with Throttle</h2>
+    <p>
+      This example uses <code>fromEvent</code> and <code>debounceTime</code> to
+      track mouse movements and reduce the frequency of emissions.
+    </p>
+
+    <div class="controls">
+      <button
+        (click)="startMouseMoveStream()"
+        [disabled]="mouseMoveSubscription !== null"
+      >
+        Start Tracking Mouse
+      </button>
+      <button
+        (click)="stopMouseMoveStream()"
+        [disabled]="mouseMoveSubscription === null"
+      >
+        Stop Tracking Mouse
       </button>
     </div>
 
     <div class="output">
-      <h3>Stream Values:</h3>
-      <div *ngIf="streamValues.length > 0; else noValues">
+      <h3>Mouse Positions (throttled):</h3>
+      <div *ngIf="mouseMoves.length > 0">
         <ul>
-          <li *ngFor="let value of streamValues">
-            {{ value | number: "1.2-2" }}
+          <li *ngFor="let move of mouseMoves">
+            ({{ move.x | number: "1.0-0" }}, {{ move.y | number: "1.0-0" }})
           </li>
         </ul>
       </div>
-      <ng-template #noValues>
-        <p>No values yet. Start the stream!</p>
-      </ng-template>
-      <p *ngIf="isIntervalRunning" class="status">Stream is running...</p>
-      <p *ngIf="currentValue > 0" class="current-value">
-        Current value: <strong>{{ currentValue | number: "1.2-2" }}</strong>
-      </p>
+      <div *ngIf="mouseMoves.length === 0" class="no-results">
+        No mouse movements tracked yet.
+      </div>
     </div>
   </div>
 
-  <!-- HTTP Example -->
+  <!-- Custom Data Stream Example -->
   <div class="section">
-    <h2>Example 2: Simulated HTTP Request</h2>
-    <p>Demonstrates handling async HTTP responses and errors.</p>
+    <h2>Example 4: Custom Data Stream with Map</h2>
+    <p>
+      This example uses <code>of</code> and <code>map</code> to transform an
+      array of user objects into formatted strings.
+    </p>
 
     <div class="controls">
-      <button (click)="simulateHttpRequest()" [disabled]="isHttpRequestRunning">
-        Simulate HTTP Request
-      </button>
+      <button (click)="startUserStream()">Transform Users</button>
     </div>
 
     <div class="output">
-      <h3>Response:</h3>
-      <div *ngIf="httpResponse" class="success">
-        {{ httpResponse }}
+      <h3>Transformed Users:</h3>
+      <div *ngIf="userStreamValues.length > 0">
+        <ul>
+          <li *ngFor="let user of userStreamValues">{{ user }}</li>
+        </ul>
       </div>
-      <div *ngIf="httpError" class="error">
-        {{ httpError }}
+      <div *ngIf="userStreamValues.length === 0" class="no-results">
+        No users transformed yet.
       </div>
-      <p *ngIf="isHttpRequestRunning" class="status">Request in progress...</p>
     </div>
-  </div>
-
-  <!-- Kotlin Comparison -->
-  <div class="section">
-    <h2>RxJS vs. Kotlin</h2>
-    <p>
-      In Kotlin, you might use <strong>coroutines</strong> or
-      <strong>Flow</strong> for async programming. RxJS is similar but uses
-      <strong>Observables</strong> and <strong>Subscriptions</strong>.
-    </p>
-    <table>
-      <thead>
-        <tr>
-          <th>Concept</th>
-          <th>RxJS (Angular)</th>
-          <th>Kotlin</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Async Stream</td>
-          <td><code>Observable</code></td>
-          <td><code>Flow</code></td>
-        </tr>
-        <tr>
-          <td>Transformation</td>
-          <td><code>map</code>, <code>filter</code></td>
-          <td><code>map</code>, <code>filter</code></td>
-        </tr>
-        <tr>
-          <td>Subscription</td>
-          <td><code>subscribe()</code></td>
-          <td><code>collect()</code> or <code>launch</code></td>
-        </tr>
-        <tr>
-          <td>Cleanup</td>
-          <td><code>unsubscribe()</code></td>
-          <td>Automatic with coroutine scope</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
   <!-- Best Practices -->
   <div class="section">
-    <h2>Best Practices</h2>
+    <h2>Best Practices with Operators</h2>
     <ul>
       <li>
-        <strong>Always unsubscribe</strong>: Use <code>takeUntil</code> or
-        <code>ngOnDestroy</code>
-        to avoid memory leaks.
+        <strong>Chain operators</strong>: Use the <code>pipe</code> method to
+        chain operators in a readable way.
       </li>
       <li>
         <strong>Avoid side effects in operators</strong>: Use
-        <code>tap</code> for side effects.
+        <code>tap</code> for side effects like logging.
+      </li>
+      <li>
+        <strong>Unsubscribe</strong>: Always clean up subscriptions to avoid
+        memory leaks.
       </li>
       <li>
         <strong>Use async pipe in templates</strong>: Automatically handles
-        subscriptions.
+        subscriptions in Angular templates.
       </li>
       <li>
-        <strong>Error handling</strong>: Always provide an
-        <code>error</code> callback in <code>subscribe</code>.
+        <strong>Error handling</strong>: Provide an <code>error</code> callback
+        in <code>subscribe</code>.
       </li>
     </ul>
   </div>

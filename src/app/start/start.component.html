@@ -44,7 +44,8 @@
           Are event handlers (e.g., `(click)`, `[input]`) correctly bound?
         </li>
         <li>
-          Are there any <strong>direct service calls</strong> in the template? -> Change Detection
+          Are there any <strong>direct service calls</strong> in the template?
+          -> Change Detection
         </li>
       </ul>
     </div>
@@ -64,15 +65,19 @@
         </li>
         <li>
           Is <strong>`ChangeDetectionStrategy.OnPush`</strong> used where
-          applicable?
+          applicable? -> Change Detection
         </li>
-        <li>Is state properly isolated (e.g., not shared unintentionally)? DONT SHARE STATE</li>
+        <li>
+          Is state properly isolated (e.g., not shared unintentionally)? DONT
+          SHARE STATE
+        </li>
         <li>
           Are side effects (e.g., API calls) managed with
-          <strong>`effect`</strong> or <strong>`ngOnDestroy`</strong>?
+          <strong>`effect`</strong> or <strong>`ngOnDestroy`</strong>? -> RxJS
         </li>
         <li>
-          Is immutability maintained (e.g., spread operator, `signal.set / signal.update`)?
+          Is immutability maintained (e.g., spread operator, `signal.set /
+          signal.update`)?
         </li>
       </ul>
     </div>
@@ -90,12 +95,10 @@
           Are <strong>`&#64;Input()`</strong> and
           <strong>`&#64;Output()`</strong> properties strongly typed?
         </li>
-        <li>Are input setters used for side effects (e.g., `ngOnChanges`)?</li>
         <li>
-          Are custom events (e.g., `&#64;Output() saved`) used for
-          communication?
+          Are custom events (e.g., `&#64;Output() saved`) used for communication
+          to other components?
         </li>
-        <li>Are default values provided for optional inputs?</li>
       </ul>
     </div>
   </div>
@@ -112,10 +115,7 @@
         <li>
           Are services used for business logic instead of duplicating logic?
         </li>
-        <li>
-          Are injected services and dependencies
-          <strong>strongly typed</strong>?
-        </li>
+        <li>Are services used application wide or provided?</li>
       </ul>
     </div>
   </div>
@@ -128,11 +128,11 @@
     </div>
     <div class="section-content" [class.expanded]="sections['performance']">
       <ul>
-        <li>Is <strong>`ChangeDetectionStrategy.OnPush`</strong> used?</li>
         <li>Is <strong>`track`</strong> used in loops (e.g., `&#64;for`)?</li>
-        <li>Are heavy dependencies <strong>lazy-loaded</strong>?</li>
         <li>Are subscriptions cleaned up? -> RxJS</li>
-        <li>Are user inputs (e.g., search) <strong>debounced</strong>? -> RxJS</li>
+        <li>
+          Are user inputs (e.g., search) <strong>debounced</strong>? -> RxJS
+        </li>
       </ul>
     </div>
   </div>
@@ -145,12 +145,8 @@
     </div>
     <div class="section-content" [class.expanded]="sections['testing']">
       <ul>
-        <li>Are there <strong>unit tests</strong> for the component?</li>
-        <li>Do tests cover inputs, outputs, and template rendering?</li>
-        <li>
-          Are dependencies (e.g., services) <strong>mocked</strong> in tests?
-        </li>
-        <li>Are there tests for edge cases (e.g., empty state, errors)?</li>
+        <li>Are there <strong>tests</strong> for the component?</li>
+        <li>Is there enough test coverage (80%)?</li>
       </ul>
     </div>
   </div>
@@ -163,10 +159,9 @@
     </div>
     <div class="section-content" [class.expanded]="sections['http']">
       <ul>
-        <li>Cold observables!</li>
+        <li>Cold observables! (fails silently)</li>
         <li>Like, subscribe and comment</li>
         <li>Like, subscribe and comment</li>
-
       </ul>
     </div>
   </div>
@@ -179,61 +174,8 @@
     </div>
     <div class="section-content" [class.expanded]="sections['styling']">
       <ul>
-        <li>Is <strong>`ViewEncapsulation`</strong> set correctly?</li>
-        <li>Are styles <strong>scoped</strong> to the component?</li>
-        <li>Is the component <strong>responsive</strong>?</li>
-        <li>Are colors compatible with <strong>light/dark mode</strong>?</li>
+        <li>Is there custom styling? (e.g. margins in px)</li>
       </ul>
     </div>
   </div>
-
-  <!-- Error Handling -->
-  <div class="checklist-section">
-    <div class="section-header" (click)="toggleSection('errors')">
-      <h2>10. Error Handling</h2>
-      <span class="toggle-icon">{{ sections["errors"] ? "▼" : "▶" }}</span>
-    </div>
-    <div class="section-content" [class.expanded]="sections['errors']">
-      <ul>
-        <li>Are inputs <strong>validated</strong>?</li>
-        <li>Are errors caught and handled gracefully?</li>
-        <li>Are users notified of errors (e.g., toast, snackbar)?</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Documentation -->
-  <div class="checklist-section">
-    <div class="section-header" (click)="toggleSection('docs')">
-      <h2>11. Documentation</h2>
-      <span class="toggle-icon">{{ sections["docs"] ? "▼" : "▶" }}</span>
-    </div>
-    <div class="section-content" [class.expanded]="sections['docs']">
-      <ul>
-        <li>Is the component’s <strong>API documented</strong>?</li>
-        <li>Are there <strong>usage examples</strong>?</li>
-        <li>Are edge cases (e.g., loading, empty states) documented?</li>
-      </ul>
-    </div>
-  </div>
-
-  <!-- Modern Angular Features -->
-  <div class="checklist-section">
-    <div class="section-header" (click)="toggleSection('modern')">
-      <h2>12. Modern Angular Features</h2>
-      <span class="toggle-icon">{{ sections["modern"] ? "▼" : "▶" }}</span>
-    </div>
-    <div class="section-content" [class.expanded]="sections['modern']">
-      <ul>
-        <li>
-          Is the component <strong>standalone</strong> if it doesn’t need an
-          `NgModule`?
-        </li>
-        <li>Are <strong>Signals</strong> used for state management?</li>
-        <li>Are <strong>deferrable views</strong> used for lazy loading?</li>
-        <li>Is the new control flow syntax (`&#64;if`, `&#64;for`) used?</li>
-      </ul>
-    </div>
-  </div>
-
 </div>
