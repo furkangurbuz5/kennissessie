@@ -26,6 +26,8 @@ import {
   of,
   Subject,
   takeUntil,
+  distinctUntilChanged,
+  switchMap,
 } from 'rxjs';
 
 @Component({
@@ -57,10 +59,11 @@ export class StreamsComponent implements OnInit, OnDestroy {
   unsafeStreamValuesSubscription: Subscription = new Subscription();
 
   // Search example state
-  searchControl = new FormControl('');
+  searchControl: FormControl = new FormControl('');
   searchResults: string[] = [];
   searchSubscription: Subscription | null = null;
   searchResults$: Subject<string[]> = new Subject<string[]>();
+  searchInput$: Subject<Event> = new Subject<Event>();
 
   // Mouse move example state
   mouseMoveSubscription: Subscription | null = null;
@@ -80,22 +83,7 @@ export class StreamsComponent implements OnInit, OnDestroy {
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    this.searchSubscription = this.searchControl.valueChanges
-      .pipe(
-        debounceTime(500),
-        map((searchTerm) =>
-          this.users.filter((user) =>
-            user.name.toLowerCase().includes((searchTerm || '').toLowerCase()),
-          ),
-        ),
-      )
-      .subscribe({
-        next: (filteredUsers) => {
-          this.searchResults = filteredUsers.map((user) => user.name);
-          this.searchResults$.next(this.searchResults);
-          this.cdr.detectChanges();
-        },
-      });
+    
   }
 
   ngOnDestroy() {
@@ -105,7 +93,9 @@ export class StreamsComponent implements OnInit, OnDestroy {
     // this.destroy$.emit();
   }
 
-  startSearch() {}
+  emitValue(event: Event) {
+    this.searchInput$.next(event);
+  }
 
   stopStream() {
     this.destroy$.emit();

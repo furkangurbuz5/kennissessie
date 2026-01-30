@@ -27,7 +27,7 @@
   <div class="section">
     <h2>Interval stream with operators</h2>
     <p>
-      This example uses <code>interval</code> to emit values every second and
+      <code>Interval</code> emits values every second and
       applies <code>map</code>, <code>filter</code>, and
       <code>take</code> operators.
     </p>
@@ -49,7 +49,6 @@
     </div>
 
     <div class="stream-container">
-      <!-- Main output -->
       <div class="output">
         <h3>Operator Pipeline:</h3>
         <ol>
@@ -76,7 +75,6 @@
         </ol>
       </div>
 
-      <!-- Leaking Stream Output -->
       <div class="leaking-output">
         <h3>⚠️ Leaking Stream Output:</h3>
         <div class="leaking-values">
@@ -89,11 +87,10 @@
     
   </div>
 
-  <!-- Search Example -->
   <div class="section">
-    <h2>Example 2: Search with Debounce</h2>
+    <h2>Performance, http, e.g. with debounce and throttle</h2>
     <p>
-      This example uses <code>debounceTime</code> and <code>map</code> to filter
+      <code>debounceTime</code> and <code>map</code> to filter
       a list of users based on a search term. The search only triggers after
       500ms of inactivity.
     </p>
@@ -103,7 +100,6 @@
         type="text"
         placeholder="Search users..."
         class="search-input"
-        (valueChange)="startSearch()"
       />
       @if (searchResults.length > 0) {
         <div class="search-results">
@@ -121,9 +117,8 @@
     </div>
   </div>
 
-  <!-- Mouse Move Example -->
   <div class="section">
-    <h2>Example 3: Mouse Move with Throttle</h2>
+    <h2>Mouse Move with throttle</h2>
     <p>
       This example uses <code>fromEvent</code> and <code>debounceTime</code> to
       track mouse movements and reduce the frequency of emissions.
@@ -163,9 +158,8 @@
     </div>
   </div>
 
-  <!-- Custom Data Stream Example -->
   <div class="section">
-    <h2>Example 4: Custom Data Stream with Map</h2>
+    <h2>Custom Data Stream with Map</h2>
     <p>
       This example uses <code>of</code> and <code>map</code> to transform an
       array of user objects into formatted strings.
