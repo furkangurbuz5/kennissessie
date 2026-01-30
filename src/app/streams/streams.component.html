@@ -1,7 +1,151 @@
 <img src="rxjs-logo.png" alt="The RxJS logo" />
 <h1>RxJS en Observables</h1>
-<p>"Stroom van data in tijd"</p>
 
-<p>
-  <button>Click</button>
-</p>
+<div class="streams-container">
+  <!-- Introduction -->
+  <div class="section">
+    <h2>What is RxJS?</h2>
+    <p>
+      RxJS is a library for <strong>reactive programming</strong> using
+      <strong>Observables</strong>. It helps manage
+      <strong>asynchronous data streams</strong> (e.g., user inputs, HTTP
+      responses, timers).
+    </p>
+    <ul>
+      <li>
+        <strong>Observables</strong>: Represent streams of data over time.
+      </li>
+      <li>
+        <strong>Operators</strong>: Transform, filter, or combine streams (e.g.,
+        `map`, `filter`, `debounceTime`).
+      </li>
+      <li>
+        <strong>Subscriptions</strong>: Execute side effects when data arrives.
+      </li>
+    </ul>
+  </div>
+
+  <!-- Interval Example -->
+  <div class="section">
+    <h2>Example 1: Interval Stream</h2>
+    <p>Demonstrates a stream that emits values every second.</p>
+
+    <div class="controls">
+      <button (click)="startIntervalStream()" [disabled]="isIntervalRunning">
+        Start Stream
+      </button>
+      <button (click)="stopIntervalStream()" [disabled]="!isIntervalRunning">
+        Stop Stream
+      </button>
+      <button (click)="dangerousLeakingInterval()" class="danger-button">
+        ⚠️ Leaking Stream (Demo)
+      </button>
+    </div>
+
+    <div class="output">
+      <h3>Stream Values:</h3>
+      <div *ngIf="streamValues.length > 0; else noValues">
+        <ul>
+          <li *ngFor="let value of streamValues">
+            {{ value | number: "1.2-2" }}
+          </li>
+        </ul>
+      </div>
+      <ng-template #noValues>
+        <p>No values yet. Start the stream!</p>
+      </ng-template>
+      <p *ngIf="isIntervalRunning" class="status">Stream is running...</p>
+      <p *ngIf="currentValue > 0" class="current-value">
+        Current value: <strong>{{ currentValue | number: "1.2-2" }}</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- HTTP Example -->
+  <div class="section">
+    <h2>Example 2: Simulated HTTP Request</h2>
+    <p>Demonstrates handling async HTTP responses and errors.</p>
+
+    <div class="controls">
+      <button (click)="simulateHttpRequest()" [disabled]="isHttpRequestRunning">
+        Simulate HTTP Request
+      </button>
+    </div>
+
+    <div class="output">
+      <h3>Response:</h3>
+      <div *ngIf="httpResponse" class="success">
+        {{ httpResponse }}
+      </div>
+      <div *ngIf="httpError" class="error">
+        {{ httpError }}
+      </div>
+      <p *ngIf="isHttpRequestRunning" class="status">Request in progress...</p>
+    </div>
+  </div>
+
+  <!-- Kotlin Comparison -->
+  <div class="section">
+    <h2>RxJS vs. Kotlin</h2>
+    <p>
+      In Kotlin, you might use <strong>coroutines</strong> or
+      <strong>Flow</strong> for async programming. RxJS is similar but uses
+      <strong>Observables</strong> and <strong>Subscriptions</strong>.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>RxJS (Angular)</th>
+          <th>Kotlin</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Async Stream</td>
+          <td><code>Observable</code></td>
+          <td><code>Flow</code></td>
+        </tr>
+        <tr>
+          <td>Transformation</td>
+          <td><code>map</code>, <code>filter</code></td>
+          <td><code>map</code>, <code>filter</code></td>
+        </tr>
+        <tr>
+          <td>Subscription</td>
+          <td><code>subscribe()</code></td>
+          <td><code>collect()</code> or <code>launch</code></td>
+        </tr>
+        <tr>
+          <td>Cleanup</td>
+          <td><code>unsubscribe()</code></td>
+          <td>Automatic with coroutine scope</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Best Practices -->
+  <div class="section">
+    <h2>Best Practices</h2>
+    <ul>
+      <li>
+        <strong>Always unsubscribe</strong>: Use <code>takeUntil</code> or
+        <code>ngOnDestroy</code>
+        to avoid memory leaks.
+      </li>
+      <li>
+        <strong>Avoid side effects in operators</strong>: Use
+        <code>tap</code> for side effects.
+      </li>
+      <li>
+        <strong>Use async pipe in templates</strong>: Automatically handles
+        subscriptions.
+      </li>
+      <li>
+        <strong>Error handling</strong>: Always provide an
+        <code>error</code> callback in <code>subscribe</code>.
+      </li>
+    </ul>
+  </div>
+</div>

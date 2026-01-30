@@ -44,7 +44,7 @@
           Are event handlers (e.g., `(click)`, `[input]`) correctly bound?
         </li>
         <li>
-          Are there any <strong>direct service calls</strong> in the template?
+          Are there any <strong>direct service calls</strong> in the template? -> Change Detection
         </li>
       </ul>
     </div>
@@ -129,10 +129,10 @@
     <div class="section-content" [class.expanded]="sections['performance']">
       <ul>
         <li>Is <strong>`ChangeDetectionStrategy.OnPush`</strong> used?</li>
-        <li>Is <strong>`trackBy`</strong> used in loops (e.g., `&#64;for`)?</li>
+        <li>Is <strong>`track`</strong> used in loops (e.g., `&#64;for`)?</li>
         <li>Are heavy dependencies <strong>lazy-loaded</strong>?</li>
-        <li>Are subscriptions cleaned up in <strong>`ngOnDestroy`</strong>?</li>
-        <li>Are user inputs (e.g., search) <strong>debounced</strong>?</li>
+        <li>Are subscriptions cleaned up? -> RxJS</li>
+        <li>Are user inputs (e.g., search) <strong>debounced</strong>? -> RxJS</li>
       </ul>
     </div>
   </div>
