@@ -20,6 +20,12 @@ export class StreamsComponent {
     //   }
     // )
 
+
+    
+    //HTTP:
+
+    // .subscribe() triggert de request. Verschil ten opzichte van Kotlin?
+
   }
 
 }
