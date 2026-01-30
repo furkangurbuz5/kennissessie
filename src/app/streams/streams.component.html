@@ -25,7 +25,7 @@
 
   <!-- Interval Example -->
   <div class="section">
-    <h2>Example 1: Interval Stream with Operators</h2>
+    <h2>Interval stream with operators</h2>
     <p>
       This example uses <code>interval</code> to emit values every second and
       applies <code>map</code>, <code>filter</code>, and
@@ -42,6 +42,10 @@
       <button (click)="dangerousLeakingInterval()" class="danger-button">
         ⚠️ Leaking Stream (Demo)
       </button>
+      <button (click)="stopStream()" class="danger-button">⚠️ Danger Button (DONT PRESS)</button>
+      @if (isIntervalRunning) {
+        <div class="spinner" [class.spin]="isIntervalRunning"></div>
+      }
     </div>
 
     <div class="stream-container">
@@ -76,12 +80,13 @@
       <div class="leaking-output">
         <h3>⚠️ Leaking Stream Output:</h3>
         <div class="leaking-values">
-          @for (value of unsafeStreamValues; track value) {
-            <div>{{ value }}</div>
+          @for (value of unsafeStreamValues$ | async; track value) {
+            <div>{{ value | number: '1.2-2'}}</div>
           }
         </div>
       </div>
     </div>
+    
   </div>
 
   <!-- Search Example -->

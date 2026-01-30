@@ -1,5 +1,18 @@
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
-import { AsyncPipe, CommonModule, JsonPipe } from '@angular/common';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  EventEmitter,
+  inject,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
+import {
+  AsyncPipe,
+  CommonModule,
+  DecimalPipe,
+  JsonPipe,
+} from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   interval,
@@ -12,12 +25,13 @@ import {
   fromEvent,
   of,
   Subject,
+  takeUntil,
 } from 'rxjs';
 
 @Component({
   selector: 'app-streams',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, AsyncPipe, JsonPipe],
+  imports: [CommonModule, ReactiveFormsModule, AsyncPipe, DecimalPipe],
   templateUrl: './streams.component.html',
   styleUrls: ['./streams.component.css'],
 })
@@ -40,6 +54,7 @@ export class StreamsComponent implements OnInit, OnDestroy {
 
   unsafeStreamValues: number[] = [];
   unsafeStreamValues$: Subject<number[]> = new Subject<number[]>();
+  unsafeStreamValuesSubscription: Subscription = new Subscription();
 
   // Search example state
   searchControl = new FormControl('');
@@ -60,10 +75,11 @@ export class StreamsComponent implements OnInit, OnDestroy {
   userStreamValues: string[] = [];
   userStreamValues$: Subject<string[]> = new Subject<string[]>();
 
+  destroy$ = new EventEmitter();
+
   constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
-    // Search example with debounceTime
     this.searchSubscription = this.searchControl.valueChanges
       .pipe(
         debounceTime(500),
@@ -83,15 +99,18 @@ export class StreamsComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    // Clean up all subscriptions
-    this.intervalSubscription?.unsubscribe();
+    // this.intervalSubscription?.unsubscribe();
     this.searchSubscription?.unsubscribe();
     this.mouseMoveSubscription?.unsubscribe();
+    // this.destroy$.emit();
   }
 
-  startSearch(){}
+  startSearch() {}
 
-  // Example 1: Interval stream with map, filter, and take operators
+  stopStream() {
+    this.destroy$.emit();
+  }
+
   startIntervalStream() {
     if (this.isIntervalRunning) return;
 
@@ -114,6 +133,7 @@ export class StreamsComponent implements OnInit, OnDestroy {
         tap((takenValue) => this.takenValues.push(takenValue)),
       )
       .subscribe({
+        next: (val) => console.log(val),
         complete: () => {
           this.isIntervalRunning = false;
           console.log('Interval stream completed after 10 values.');
@@ -130,7 +150,6 @@ export class StreamsComponent implements OnInit, OnDestroy {
     this.intervalSubscription?.unsubscribe();
   }
 
-  // Example 2: Mouse move stream with throttle and map
   startMouseMoveStream() {
     this.mouseMoves = [];
     this.mouseMoveSubscription = fromEvent<MouseEvent>(document, 'mousemove')
@@ -153,7 +172,6 @@ export class StreamsComponent implements OnInit, OnDestroy {
     this.mouseMoveSubscription?.unsubscribe();
   }
 
-  // Example 3: Custom data stream with map
   startUserStream() {
     this.userStreamValues = [];
     of(...this.users)
@@ -165,21 +183,22 @@ export class StreamsComponent implements OnInit, OnDestroy {
           this.userStreamValues.push(userString);
           this.cdr.detectChanges();
         },
-        complete: () => this.userStreamValues$.next(this.userStreamValues)
+        complete: () => this.userStreamValues$.next(this.userStreamValues),
       });
-
-      
   }
 
-  // Example 4: Dangerous leaking interval (for demonstration)
   dangerousLeakingInterval() {
     console.warn('⚠️ This will leak memory! Check browser dev tools.');
-    interval(1000)
-      .pipe(map((value) => value * 1.05))
+    this.unsafeStreamValuesSubscription = interval(1000)
+      .pipe(
+        map((value) => value * 1.05),
+        takeUntil(this.destroy$),
+      )
       .subscribe({
         next: (value) => {
           console.log('Leaking interval:', value);
           this.unsafeStreamValues.push(value);
+          this.unsafeStreamValues$.next(this.unsafeStreamValues);
         },
       });
   }
