@@ -1,5 +1,5 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core';
+import { AsyncPipe, CommonModule, JsonPipe } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import {
   interval,
@@ -10,14 +10,14 @@ import {
   tap,
   Subscription,
   fromEvent,
-  Observable,
   of,
+  Subject,
 } from 'rxjs';
 
 @Component({
   selector: 'app-streams',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, AsyncPipe, JsonPipe],
   templateUrl: './streams.component.html',
   styleUrls: ['./streams.component.css'],
 })
@@ -25,16 +25,27 @@ export class StreamsComponent implements OnInit, OnDestroy {
   // Interval stream state
   isIntervalRunning = false;
   intervalSubscription: Subscription | null = null;
+
   intervalValues: number[] = [];
+  intervalValues$: Subject<number[]> = new Subject<number[]>();
+
   mappedValues: number[] = [];
+  mappedValues$: Subject<number[]> = new Subject<number[]>();
+
   filteredValues: number[] = [];
+  filteredValues$: Subject<number[]> = new Subject<number[]>();
+
   takenValues: number[] = [];
+  takenValues$: Subject<number[]> = new Subject<number[]>();
+
   unsafeStreamValues: number[] = [];
+  unsafeStreamValues$: Subject<number[]> = new Subject<number[]>();
 
   // Search example state
   searchControl = new FormControl('');
   searchResults: string[] = [];
   searchSubscription: Subscription | null = null;
+  searchResults$: Subject<string[]> = new Subject<string[]>();
 
   // Mouse move example state
   mouseMoveSubscription: Subscription | null = null;
@@ -47,6 +58,9 @@ export class StreamsComponent implements OnInit, OnDestroy {
     { id: 3, name: 'Charlie', age: 24 },
   ];
   userStreamValues: string[] = [];
+  userStreamValues$: Subject<string[]> = new Subject<string[]>();
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   ngOnInit() {
     // Search example with debounceTime
@@ -55,13 +69,15 @@ export class StreamsComponent implements OnInit, OnDestroy {
         debounceTime(500),
         map((searchTerm) =>
           this.users.filter((user) =>
-            user.name.toLowerCase().includes((searchTerm || '').toLowerCase())
-          )
-        )
+            user.name.toLowerCase().includes((searchTerm || '').toLowerCase()),
+          ),
+        ),
       )
       .subscribe({
         next: (filteredUsers) => {
           this.searchResults = filteredUsers.map((user) => user.name);
+          this.searchResults$.next(this.searchResults);
+          this.cdr.detectChanges();
         },
       });
   }
@@ -72,6 +88,8 @@ export class StreamsComponent implements OnInit, OnDestroy {
     this.searchSubscription?.unsubscribe();
     this.mouseMoveSubscription?.unsubscribe();
   }
+
+  startSearch(){}
 
   // Example 1: Interval stream with map, filter, and take operators
   startIntervalStream() {
@@ -85,22 +103,24 @@ export class StreamsComponent implements OnInit, OnDestroy {
 
     this.intervalSubscription = interval(100)
       .pipe(
-        tap((value) => this.intervalValues.push(value)), 
-        map((value) => value * 2), 
-        tap((mappedValue) => this.mappedValues.push(mappedValue)), 
-        filter((value) => value % 3 === 0), 
-        tap((filteredValue) => this.filteredValues.push(filteredValue)), 
-        take(10), 
-        tap((takenValue) => this.takenValues.push(takenValue))
+        tap((value) => {
+          this.intervalValues.push(value);
+        }),
+        map((value) => value * 2),
+        tap((mappedValue) => this.mappedValues.push(mappedValue)),
+        filter((value) => value % 3 === 0),
+        tap((filteredValue) => this.filteredValues.push(filteredValue)),
+        take(10),
+        tap((takenValue) => this.takenValues.push(takenValue)),
       )
       .subscribe({
         complete: () => {
           this.isIntervalRunning = false;
           console.log('Interval stream completed after 10 values.');
-          console.log("Interval values: ", this.intervalValues);
-          console.log("Mapped values: ", this.mappedValues);
-          console.log("Filtered values: ", this.filteredValues);
-          console.log("Taken values: ", this.takenValues);
+          this.intervalValues$.next(this.intervalValues);
+          this.mappedValues$.next(this.mappedValues);
+          this.filteredValues$.next(this.filteredValues);
+          this.takenValues$.next(this.takenValues);
         },
       });
   }
@@ -116,7 +136,7 @@ export class StreamsComponent implements OnInit, OnDestroy {
     this.mouseMoveSubscription = fromEvent<MouseEvent>(document, 'mousemove')
       .pipe(
         debounceTime(100), // Throttle to reduce frequency
-        map((event) => ({ x: event.clientX, y: event.clientY })) // Map to coordinates
+        map((event) => ({ x: event.clientX, y: event.clientY })), // Map to coordinates
       )
       .subscribe({
         next: (coordinates) => {
@@ -124,6 +144,7 @@ export class StreamsComponent implements OnInit, OnDestroy {
           if (this.mouseMoves.length > 20) {
             this.mouseMoves.shift(); // Keep only the last 20 moves
           }
+          this.cdr.detectChanges();
         },
       });
   }
@@ -137,13 +158,17 @@ export class StreamsComponent implements OnInit, OnDestroy {
     this.userStreamValues = [];
     of(...this.users)
       .pipe(
-        map((user) => `${user.name} (${user.age} years old)`) // Transform user object
+        map((user) => `${user.name} (${user.age} years old)`), // Transform user object
       )
       .subscribe({
         next: (userString) => {
           this.userStreamValues.push(userString);
+          this.cdr.detectChanges();
         },
+        complete: () => this.userStreamValues$.next(this.userStreamValues)
       });
+
+      
   }
 
   // Example 4: Dangerous leaking interval (for demonstration)
@@ -159,6 +184,3 @@ export class StreamsComponent implements OnInit, OnDestroy {
       });
   }
 }
-
-  
-

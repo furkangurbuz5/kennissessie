@@ -39,29 +39,48 @@
       <button (click)="stopIntervalStream()" [disabled]="!isIntervalRunning">
         Stop Stream
       </button>
+      <button (click)="dangerousLeakingInterval()" class="danger-button">
+        ⚠️ Leaking Stream (Demo)
+      </button>
     </div>
 
-    <div class="output">
-      <h3>Operator Pipeline:</h3>
-      <ol>
-        <li><code>interval(1000)</code>: Emits 0, 1, 2, 3... every second.</li>
-        <li>
-          <code>tap</code>: Logs raw values →
-          <strong>{{ intervalValues }}</strong>
-        </li>
-        <li>
-          <code>map(value => value * 2)</code>: Doubles each value →
-          <strong>{{ mappedValues }}</strong>
-        </li>
-        <li>
-          <code>filter(value => value % 3 === 0)</code>: Keeps multiples of 3 →
-          <strong>{{ filteredValues }}</strong>
-        </li>
-        <li>
-          <code>take(10)</code>: Takes first 10 values →
-          <strong>{{ takenValues }}</strong>
-        </li>
-      </ol>
+    <div class="stream-container">
+      <!-- Main output -->
+      <div class="output">
+        <h3>Operator Pipeline:</h3>
+        <ol>
+          <li>
+            <code>interval(1000)</code>: Emits 0, 1, 2, 3... every second.
+          </li>
+          <li>
+            <code>tap</code>: Logs raw values →
+            <strong>{{ intervalValues$ | async }}</strong>
+          </li>
+          <li>
+            <code>map(value => value * 2)</code>: Doubles each value →
+            <strong>{{ mappedValues$ | async }}</strong>
+          </li>
+          <li>
+            <code>filter(value => value % 3 === 0)</code>: Keeps multiples of 3
+            →
+            <strong>{{ filteredValues$ | async }}</strong>
+          </li>
+          <li>
+            <code>take(10)</code>: Takes first 10 values →
+            <strong>{{ takenValues$ | async }}</strong>
+          </li>
+        </ol>
+      </div>
+
+      <!-- Leaking Stream Output -->
+      <div class="leaking-output">
+        <h3>⚠️ Leaking Stream Output:</h3>
+        <div class="leaking-values">
+          @for (value of unsafeStreamValues; track value) {
+            <div>{{ value }}</div>
+          }
+        </div>
+      </div>
     </div>
   </div>
 
@@ -77,22 +96,23 @@
     <div class="search-container">
       <input
         type="text"
-        [formControl]="searchControl"
         placeholder="Search users..."
         class="search-input"
+        (valueChange)="startSearch()"
       />
-      <div *ngIf="searchResults.length > 0" class="search-results">
-        <h3>Results:</h3>
-        <ul>
-          <li *ngFor="let result of searchResults">{{ result }}</li>
-        </ul>
-      </div>
-      <div
-        *ngIf="searchResults.length === 0 && searchControl.value"
-        class="no-results"
-      >
-        No users found.
-      </div>
+      @if (searchResults.length > 0) {
+        <div class="search-results">
+          <h3>Results:</h3>
+          <ul>
+            @for (result of searchResults$ | async; track result) {
+              <li>{{ result }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (searchResults.length === 0) {
+        <div class="no-results">No users found.</div>
+      }
     </div>
   </div>
 
@@ -121,16 +141,20 @@
 
     <div class="output">
       <h3>Mouse Positions (throttled):</h3>
-      <div *ngIf="mouseMoves.length > 0">
-        <ul>
-          <li *ngFor="let move of mouseMoves">
-            ({{ move.x | number: "1.0-0" }}, {{ move.y | number: "1.0-0" }})
-          </li>
-        </ul>
-      </div>
-      <div *ngIf="mouseMoves.length === 0" class="no-results">
-        No mouse movements tracked yet.
-      </div>
+      @if (mouseMoves.length > 0) {
+        <div>
+          <ul>
+            @for (move of mouseMoves; track move) {
+              <li>
+                ({{ move.x | number: "1.0-0" }}, {{ move.y | number: "1.0-0" }})
+              </li>
+            }
+          </ul>
+        </div>
+      }
+      @if (mouseMoves.length === 0) {
+        <div class="no-results">No mouse movements tracked yet.</div>
+      }
     </div>
   </div>
 
@@ -148,15 +172,101 @@
 
     <div class="output">
       <h3>Transformed Users:</h3>
-      <div *ngIf="userStreamValues.length > 0">
-        <ul>
-          <li *ngFor="let user of userStreamValues">{{ user }}</li>
-        </ul>
-      </div>
-      <div *ngIf="userStreamValues.length === 0" class="no-results">
-        No users transformed yet.
-      </div>
+      @if (userStreamValues.length > 0) {
+        <div>
+          <ul>
+            @for (user of userStreamValues$ | async; track user) {
+              <li>{{ user }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (userStreamValues.length === 0) {
+        <div class="no-results">No users transformed yet.</div>
+      }
     </div>
+  </div>
+
+  <!-- RxJS vs. Kotlin vs. Java -->
+  <div class="section">
+    <h2>RxJS vs. Kotlin vs. Java</h2>
+    <p>
+      In Kotlin, you might use <strong>coroutines</strong> or
+      <strong>Flow</strong> for async programming. In Java, you might use
+      <strong>CompletableFuture</strong>, <strong>RxJava</strong>, or the
+      <strong>reactive-streams</strong> API. RxJS is similar but uses
+      <strong>Observables</strong> and <strong>Subscriptions</strong>.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Concept</th>
+          <th>RxJS (Angular)</th>
+          <th>Kotlin</th>
+          <th>Java (Project Reactor)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Async Stream</td>
+          <td><code>Observable</code></td>
+          <td><code>Flow</code></td>
+          <td><code>Flux/Mono</code></td>
+        </tr>
+        <tr>
+          <td>Transformation</td>
+          <td><code>map</code>, <code>filter</code></td>
+          <td><code>map</code>, <code>filter</code></td>
+          <td><code>map</code>, <code>filter</code></td>
+        </tr>
+        <tr>
+          <td>Subscription</td>
+          <td><code>subscribe()</code></td>
+          <td><code>collect()</code> or <code>launch</code></td>
+          <td><code>subscribe()</code></td>
+        </tr>
+        <tr>
+          <td>Cleanup</td>
+          <td><code>unsubscribe()</code></td>
+          <td>Automatic with coroutine scope</td>
+          <td>Automatic with <code>Flux/Mono</code></td>
+        </tr>
+        <tr>
+          <td>Error Handling</td>
+          <td><code>catchError</code> in <code>pipe</code></td>
+          <td>
+            <code>catch</code> (Flow) or <code>try-catch</code> (coroutines)
+          </td>
+          <td><code>onErrorResume</code></td>
+        </tr>
+        <tr>
+          <td>Threading</td>
+          <td>
+            Handled by <code>asyncScheduler</code> or
+            <code>queueScheduler</code>
+          </td>
+          <td>
+            <code>Dispatchers.IO</code> or <code>Dispatchers.Default</code>
+          </td>
+          <td><code>subscribeOn</code>/<code>publishOn</code></td>
+        </tr>
+        <tr>
+          <td>Backpressure</td>
+          <td>
+            Not built-in (use operators like <code>buffer</code> or
+            <code>throttle</code>)
+          </td>
+          <td>Built-in with <code>Flow</code></td>
+          <td>Built-in with <code>Flux</code>/<code>Mono</code></td>
+        </tr>
+        <tr>
+          <td>Common Use Case</td>
+          <td>Frontend async operations (e.g., HTTP, user input)</td>
+          <td>Android/Kotlin backend async operations</td>
+          <td>Backend services, Spring WebFlux</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
   <!-- Best Practices -->

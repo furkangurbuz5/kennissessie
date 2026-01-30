@@ -5,6 +5,40 @@
   font-family: Arial, sans-serif;
 }
 
+.stream-container {
+  display: flex; /* Use flexbox for side-by-side layout */
+  gap: 20px; /* Add spacing between the two containers */
+  margin-top: 15px;
+}
+
+.output {
+  flex: 1; /* Take up half the available space */
+  padding: 10px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.leaking-output {
+  flex: 1; /* Take up half the available space */
+  padding: 10px;
+  background-color: #ffebee; /* Light red background for warning */
+  border-radius: 4px;
+  border: 1px solid #ef9a9a; /* Light red border */
+}
+
+.leaking-values {
+  max-height: 200px; /* Limit height */
+  overflow-y: auto; /* Add vertical scroll if needed */
+  background-color: white;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.leaking-values div {
+  word-break: break-all; /* Ensure long values wrap */
+}
+
 h1 {
   color: #1976d2;
   text-align: center;
@@ -50,11 +84,15 @@ button:disabled {
   background-color: #d32f2f;
 }
 
-.output {
-  margin-top: 15px;
-  padding: 10px;
-  background-color: #f5f5f5;
-  border-radius: 4px;
+.output ol {
+  word-break: break-all; /* Break long words if needed */
+  overflow-wrap: break-word; /* Wrap long lines */
+}
+
+.output strong {
+  display: inline-block; /* Ensure proper wrapping */
+  max-width: 100%; /* Limit width to container */
+  word-break: break-all; /* Break long sequences */
 }
 
 ul {
